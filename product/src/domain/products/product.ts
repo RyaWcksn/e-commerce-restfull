@@ -78,6 +78,7 @@ export class ProductImpl implements ProductInterface {
 		try {
 			const products = await this.fetchProducts();
 			await this.saveProductsToDatabase(products);
+			this.logger.log("Finish sync data")
 		} catch (error) {
 			this.logger.error(`Error while sync products data ${error}`)
 			const errMsg = new Error(`Failed to sync product data: ${(error as Error).message}`);

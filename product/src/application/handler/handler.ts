@@ -1,7 +1,7 @@
 import { ServiceInterface } from "../service/serviceRepository";
 import { HandlerInterface } from "./handlerRepository";
 import { Product } from "../../domain/products/entity";
-import { GetAllProductResponse } from "./response";
+import { GetAllProductResponse, SyncProductResponse } from "./response";
 import { HttpCode } from "../../constants/const";
 import { Request, ResponseObject, ResponseToolkit } from "@hapi/hapi";
 import { GetAllQueryParam } from "./request";
@@ -26,4 +26,20 @@ export class GetProductsHandler implements HandlerInterface {
 		return h.response(dataResponse).code(HttpCode.Ok);
 	}
 
+}
+
+export class SyncProductHandler implements HandlerInterface {
+	private serviceRepo: ServiceInterface;
+	constructor(service: ServiceInterface) {
+		this.serviceRepo = service;
+	}
+	async handle(req: Request, h: ResponseToolkit): Promise<ResponseObject> {
+		await this.serviceRepo.syncAllProduct();
+		const dataResponse: SyncProductResponse = {
+			code: HttpCode.Ok,
+			message: "syncted"
+		};
+
+		return h.response(dataResponse).code(HttpCode.Ok);
+	}
 }

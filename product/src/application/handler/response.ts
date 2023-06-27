@@ -6,3 +6,13 @@ export interface GetAllProductResponse {
 	pageSize: Number
 	data: Product[]
 }
+
+
+export interface SyncProductResponse {
+	code: Number
+	message: string
+}
+
+
+
+

@@ -2,7 +2,7 @@ import { Product } from "../../domain/products/entity";
 
 export interface GetAllProductResponse {
 	code: Number
-	page: string
-	pageSize: string
+	page: Number
+	pageSize: Number
 	data: Product[]
 }

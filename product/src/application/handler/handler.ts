@@ -18,8 +18,8 @@ export class GetProductsHandler implements HandlerInterface {
 
 		const dataResponse: GetAllProductResponse = {
 			code: HttpCode.Ok,
-			page: page,
-			pageSize: limit,
+			page: Number(page),
+			pageSize: Number(limit),
 			data: products
 		};
 

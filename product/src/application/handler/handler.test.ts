@@ -32,6 +32,8 @@ describe('GetProductsHandler', () => {
 		// Define the expected response
 		const expectedResponse = {
 			code: HttpCode.Ok,
+			page: 1,
+			pageSize: 1,
 			data: [
 				{
 					"id": "123",

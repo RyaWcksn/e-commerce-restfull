@@ -1,2 +1,6 @@
 product/node_modules
 product/dist
+product/coverage/lcov-report/dist
+product/coverage/lcov-report/dist
+product/coverage
+product/coverage

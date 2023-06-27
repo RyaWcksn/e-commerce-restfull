@@ -3,6 +3,7 @@ import { ProductInterface } from "./productRepository";
 import { Product } from "./entity";
 import { CustomError } from "../../utils/error/error";
 import { Logger } from "../../utils/logger/logger";
+import { GetAllQueryParam } from "../../application/handler/request";
 
 export class ProductImpl implements ProductInterface {
 	private pgClient: Client
@@ -11,11 +12,14 @@ export class ProductImpl implements ProductInterface {
 		this.pgClient = pg;
 		this.logger = log;
 	}
-	async getAllProduct(): Promise<Product[]> {
+	async getAllProduct(payload: GetAllQueryParam): Promise<Product[]> {
+		const { page, limit } = payload;
+
+		const offset = (Number(page) - 1) * Number(limit);
+		const query = `SELECT * FROM products OFFSET $1 LIMIT $2`;
 		this.logger.log("Select All Product impl")
 		try {
-			const query = 'SELECT * FROM products';
-			const result = await this.pgClient.query(query);
+			const result = await this.pgClient.query(query, [offset, limit]);
 
 			return result.rows as Product[];
 		} catch (error) {

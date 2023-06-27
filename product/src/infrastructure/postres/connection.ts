@@ -40,4 +40,5 @@ async function createProductsTable() {
 	}
 }
 
+
 createProductsTable();

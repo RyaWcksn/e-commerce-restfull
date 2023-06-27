@@ -3,7 +3,7 @@ import { pgConn } from "../infrastructure/postres/connection";
 import { ServiceInterface } from "../application/service/serviceRepository";
 import { ServiceImpl } from "../application/service/service";
 import { HandlerInterface } from "../application/handler/handlerRepository";
-import { GetProductsHandler } from "../application/handler/handler";
+import { GetProductsHandler, SyncProductHandler } from "../application/handler/handler";
 import { LogLevel, Logger } from "../utils/logger/logger";
 import { CustomError } from "../utils/error/error";
 import { Request, ResponseToolkit, Server, ServerRoute } from "@hapi/hapi";
@@ -26,12 +26,18 @@ const serviceImpl: ServiceInterface = new ServiceImpl(logger, productImpl)
 
 
 const getProducts: HandlerInterface = new GetProductsHandler(serviceImpl)
+const syncProducts: HandlerInterface = new SyncProductHandler(serviceImpl)
 
 const router: ServerRoute[] = [
 	{
 		method: "GET",
 		path: "/products",
 		handler: getProducts.handle.bind(getProducts)
+	},
+	{
+		method: "GET",
+		path: "/products/sync",
+		handler: syncProducts.handle.bind(syncProducts)
 	},
 ]
 

@@ -7,12 +7,25 @@ import { GetAllQueryParam } from "../handler/request";
 import { ServiceInterface } from "./serviceRepository";
 
 export class ServiceImpl implements ServiceInterface {
+
 	private log: Logger;
 	private productRepo: ProductInterface;
+
 	constructor(log: Logger, product: ProductInterface) {
 		this.log = log;
 		this.productRepo = product;
 	}
+
+	async syncAllProduct(): Promise<void> {
+		try {
+			await this.productRepo.syncProduct();
+		} catch (e) {
+			this.log.error(`Error on service layer : ${e}`)
+			const err = new CustomError(e as Error, HttpCode.InternalServerError);
+			throw err;
+		}
+	}
+
 	async getAllProduct(payload: GetAllQueryParam): Promise<Product[]> {
 		this.log.log("Service layer")
 		try {

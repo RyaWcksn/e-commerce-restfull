@@ -14,5 +14,9 @@ export interface SyncProductResponse {
 }
 
 
-
+export interface GetDetailsResponse {
+	code: Number
+	mesage: string
+	data: Product
+}
 

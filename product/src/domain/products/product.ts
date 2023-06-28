@@ -3,9 +3,10 @@ import { ProductInterface } from "./productRepository";
 import { Product } from "./entity";
 import { CustomError } from "../../utils/error/error";
 import { Logger } from "../../utils/logger/logger";
-import { GetAllQueryParam } from "../../application/handler/request";
+import { GetAllQueryParam, GetParam } from "../../application/handler/request";
 import { config } from "../../config/config";
 import axios from "axios";
+import { HttpCode } from "../../constants/const";
 
 export class ProductImpl implements ProductInterface {
 	private pgClient: Client
@@ -14,6 +15,32 @@ export class ProductImpl implements ProductInterface {
 	constructor(pg: Client, log: Logger) {
 		this.pgClient = pg;
 		this.logger = log;
+	}
+	async getProductDetail(payload: GetParam): Promise<Product> {
+		try {
+			const query = `
+      SELECT p.*, COALESCE(SUM(at.qty), 0) AS stock
+      FROM products AS p
+      LEFT JOIN adjustment_transaction AS at ON p.sku = at.sku
+      WHERE p.sku = $1
+      GROUP BY p.id
+    `;
+			const values = [payload.sku]; // Assuming the payload contains the ID of the product
+
+			const result = await this.pgClient.query(query, values);
+
+			if (result.rows.length === 0) {
+				const errMsg = new Error(`Product not found for SKU: ${payload.sku}`);
+				throw new CustomError(errMsg, HttpCode.InternalServerError);
+			}
+
+			const product = result.rows[0] as Product;
+			return product;
+		} catch (e) {
+			this.logger.error(`Error while get products data ${e}`)
+			const errMsg = new Error(`${e}`);
+			throw new CustomError(errMsg, HttpCode.InternalServerError);
+		}
 	}
 
 	async fetchProducts(): Promise<Product[]> {
@@ -42,7 +69,7 @@ export class ProductImpl implements ProductInterface {
 		} catch (error) {
 			this.logger.error(`Error while get products data ${error}`)
 			const errMsg = new Error(`Failed to get product data: ${(error as Error).message}`);
-			throw new CustomError(errMsg, 500)
+			throw new CustomError(errMsg, HttpCode.InternalServerError);
 		}
 	}
 	async saveProductsToDatabase(products: Product[]): Promise<void> {
@@ -70,7 +97,7 @@ export class ProductImpl implements ProductInterface {
 		} catch (error) {
 			this.logger.error(`Error while save products data ${error}`)
 			const errMsg = new Error(`Failed to set product data: ${(error as Error).message}`);
-			throw new CustomError(errMsg, 500)
+			throw new CustomError(errMsg, HttpCode.InternalServerError);
 		}
 	}
 
@@ -82,7 +109,8 @@ export class ProductImpl implements ProductInterface {
 		} catch (error) {
 			this.logger.error(`Error while sync products data ${error}`)
 			const errMsg = new Error(`Failed to sync product data: ${(error as Error).message}`);
-			throw new CustomError(errMsg, 500)
+			throw new CustomError(errMsg, HttpCode.InternalServerError);
+
 		}
 	}
 
@@ -90,10 +118,10 @@ export class ProductImpl implements ProductInterface {
 		var { page, limit } = payload;
 
 		if (page == undefined) {
-			page = "1"
+			page = "1";
 		}
 		if (limit == undefined) {
-			limit = "10"
+			limit = "10";
 		}
 
 		const offset = (Number(page) - 1) * Number(limit);
@@ -106,14 +134,14 @@ export class ProductImpl implements ProductInterface {
 			OFFSET $1 LIMIT $2
 
 		`;
-		this.logger.log("Select All Product impl")
+		this.logger.log("Select All Product impl");
 		try {
 			const result = await this.pgClient.query(query, [offset, limit]);
 			return result.rows as Product[];
 		} catch (error) {
-			this.logger.error(`Error while get all product ${error}`)
+			this.logger.error(`Error while get all product ${error}`);
 			const errMsg = new Error(`Failed to get product data: ${(error as Error).message}`);
-			throw new CustomError(errMsg, 500)
+			throw new CustomError(errMsg, HttpCode.InternalServerError);
 
 		}
 	}

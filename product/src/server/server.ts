@@ -3,7 +3,7 @@ import { pgConn } from "../infrastructure/postres/connection";
 import { ServiceInterface } from "../application/service/serviceRepository";
 import { ServiceImpl } from "../application/service/service";
 import { HandlerInterface } from "../application/handler/handlerRepository";
-import { GetProductsHandler, SyncProductHandler } from "../application/handler/handler";
+import { GetProductDetailHandler, GetProductsHandler, SyncProductHandler } from "../application/handler/handler";
 import { LogLevel, Logger } from "../utils/logger/logger";
 import { CustomError } from "../utils/error/error";
 import { Request, ResponseToolkit, Server, ServerRoute } from "@hapi/hapi";
@@ -19,20 +19,21 @@ const server: Server = new Server({
 			allow: 'application/json'
 		}
 	}
-})
+});
 
 // Initiate all domains and utilities
 
-const logger: Logger = Logger.getInstance()
-logger.setLogLevel(LogLevel.INFO)
+const logger: Logger = Logger.getInstance();
+logger.setLogLevel(LogLevel.INFO);
 
 const dbConn: Client = pgConn
-const productImpl: ProductInterface = new ProductImpl(dbConn, logger)
-const serviceImpl: ServiceInterface = new ServiceImpl(logger, productImpl)
+const productImpl: ProductInterface = new ProductImpl(dbConn, logger);
+const serviceImpl: ServiceInterface = new ServiceImpl(logger, productImpl);
 
 
-const getProducts: HandlerInterface = new GetProductsHandler(serviceImpl, logger)
-const syncProducts: HandlerInterface = new SyncProductHandler(serviceImpl, logger)
+const getProducts: HandlerInterface = new GetProductsHandler(serviceImpl, logger);
+const syncProducts: HandlerInterface = new SyncProductHandler(serviceImpl, logger);
+const getDetail: HandlerInterface = new GetProductDetailHandler(serviceImpl, logger);
 
 const router: ServerRoute[] = [
 	{
@@ -44,6 +45,11 @@ const router: ServerRoute[] = [
 		method: "GET",
 		path: "/products/sync",
 		handler: syncProducts.handle.bind(syncProducts)
+	},
+	{
+		method: "GET",
+		path: "/product/{sku}",
+		handler: getDetail.handle.bind(getDetail)
 	},
 ]
 

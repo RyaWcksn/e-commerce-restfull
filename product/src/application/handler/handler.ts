@@ -1,10 +1,10 @@
 import { ServiceInterface } from "../service/serviceRepository";
 import { HandlerInterface } from "./handlerRepository";
 import { Product } from "../../domain/products/entity";
-import { GetAllProductResponse, SyncProductResponse } from "./response";
+import { GetAllProductResponse, GetDetailsResponse, SyncProductResponse } from "./response";
 import { HttpCode } from "../../constants/const";
 import { Request, ResponseObject, ResponseToolkit } from "@hapi/hapi";
-import { GetAllQueryParam } from "./request";
+import { GetAllQueryParam, GetParam } from "./request";
 import { Logger } from "../../utils/logger/logger";
 import { CustomError } from "../../utils/error/error";
 
@@ -36,7 +36,7 @@ export class GetProductsHandler implements HandlerInterface {
 
 		} catch (e) {
 			this.log.error(`Error on service layer : ${e}`)
-			const newErr = new Error(`error from service layer ${e}`);
+			const newErr = new Error(`${e}`);
 			throw new CustomError(newErr, HttpCode.InternalServerError);
 		}
 	}
@@ -61,8 +61,38 @@ export class SyncProductHandler implements HandlerInterface {
 
 		} catch (e) {
 			this.log.error(`Error on service layer : ${e}`)
-			const newErr = new Error(`error from service layer ${e}`);
+			const newErr = new Error(`${e}`);
 			throw new CustomError(newErr, HttpCode.InternalServerError);
+		}
+
+	}
+}
+
+export class GetProductDetailHandler implements HandlerInterface {
+	private serviceRepo: ServiceInterface;
+	private log: Logger;
+	constructor(service: ServiceInterface, logger: Logger) {
+		this.serviceRepo = service;
+		this.log = logger;
+	}
+
+	async handle(req: Request, h: ResponseToolkit): Promise<ResponseObject> {
+		const { sku } = req.params;
+		const payload: GetParam = { sku };
+		this.log.log("SKU : ", sku)
+		try {
+			const product: Product = await this.serviceRepo.getProductDetail(payload);
+			const dataResponse: GetDetailsResponse = {
+				code: HttpCode.Ok,
+				mesage: "ok",
+				data: product
+			}
+			return h.response(dataResponse).code(HttpCode.Ok);
+		} catch (e) {
+			this.log.error(`Error on service layer : ${e}`)
+			const newErr = new Error(`${e}`);
+			throw new CustomError(newErr, HttpCode.InternalServerError);
+
 		}
 
 	}

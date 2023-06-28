@@ -3,7 +3,7 @@ import { Product } from "../../domain/products/entity";
 import { ProductInterface } from "../../domain/products/productRepository";
 import { CustomError } from "../../utils/error/error";
 import { Logger } from "../../utils/logger/logger";
-import { GetAllQueryParam } from "../handler/request";
+import { GetAllQueryParam, GetParam } from "../handler/request";
 import { ServiceInterface } from "./serviceRepository";
 
 export class ServiceImpl implements ServiceInterface {
@@ -15,13 +15,24 @@ export class ServiceImpl implements ServiceInterface {
 		this.log = log;
 		this.productRepo = product;
 	}
+	async getProductDetail(payload: GetParam): Promise<Product> {
+		try {
+			const product: Product = await this.productRepo.getProductDetail(payload);
+			return product;
+		} catch (e) {
+			this.log.error(`Error on domain layer : ${e}`)
+			const errMsg = new Error(`${e}`)
+			const err = new CustomError(errMsg, HttpCode.InternalServerError);
+			throw err;
+		}
+	}
 
 	async syncAllProduct(): Promise<void> {
 		try {
 			await this.productRepo.syncProduct();
 		} catch (e) {
 			this.log.error(`Error on domain layer : ${e}`)
-			const errMsg = new Error(`Error from error domain layer: ${e}`)
+			const errMsg = new Error(`${e}`)
 			const err = new CustomError(errMsg, HttpCode.InternalServerError);
 			throw err;
 		}
@@ -35,7 +46,7 @@ export class ServiceImpl implements ServiceInterface {
 
 		} catch (e) {
 			this.log.error(`Error on domain layer : ${e}`)
-			const errMsg = new Error(`Error from error domain layer: ${e}`)
+			const errMsg = new Error(`${e}`)
 			const err = new CustomError(errMsg, HttpCode.InternalServerError);
 			throw err;
 

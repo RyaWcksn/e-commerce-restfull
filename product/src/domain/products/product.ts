@@ -68,7 +68,7 @@ export class ProductImpl implements ProductInterface {
 			return products as Product[];
 		} catch (error) {
 			this.logger.error(`Error while get products data ${error}`)
-			const errMsg = new Error(`Failed to get product data: ${(error as Error).message}`);
+			const errMsg = new Error(`${(error as Error).message}`);
 			throw new CustomError(errMsg, HttpCode.InternalServerError);
 		}
 	}
@@ -96,7 +96,7 @@ export class ProductImpl implements ProductInterface {
 			}
 		} catch (error) {
 			this.logger.error(`Error while save products data ${error}`)
-			const errMsg = new Error(`Failed to set product data: ${(error as Error).message}`);
+			const errMsg = new Error(`${(error as Error).message}`);
 			throw new CustomError(errMsg, HttpCode.InternalServerError);
 		}
 	}
@@ -108,7 +108,7 @@ export class ProductImpl implements ProductInterface {
 			this.logger.log("Finish sync data")
 		} catch (error) {
 			this.logger.error(`Error while sync products data ${error}`)
-			const errMsg = new Error(`Failed to sync product data: ${(error as Error).message}`);
+			const errMsg = new Error(`${(error as Error).message}`);
 			throw new CustomError(errMsg, HttpCode.InternalServerError);
 
 		}
@@ -140,7 +140,7 @@ export class ProductImpl implements ProductInterface {
 			return result.rows as Product[];
 		} catch (error) {
 			this.logger.error(`Error while get all product ${error}`);
-			const errMsg = new Error(`Failed to get product data: ${(error as Error).message}`);
+			const errMsg = new Error(`${(error as Error).message}`);
 			throw new CustomError(errMsg, HttpCode.InternalServerError);
 
 		}

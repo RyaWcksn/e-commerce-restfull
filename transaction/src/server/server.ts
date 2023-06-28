@@ -7,7 +7,7 @@ import { TransactionImpl } from "../domain/transaction/transaction";
 import { TransactionInterface } from "../domain/transaction/transactionRepository";
 import { ServiceInterface } from "../application/service/serviceRepository";
 import { ServiceImpl } from "../application/service/service";
-import { CreateTransactionHandler } from "../application/handler/handler";
+import { CreateTransactionHandler, GetAllTransactionHandler } from "../application/handler/handler";
 import { HandlerInterface } from "../application/handler/handlerRepository";
 
 const server: Server = new Server({
@@ -32,12 +32,18 @@ const serviceImpl: ServiceInterface = new ServiceImpl(transactionImpl, logger);
 
 // Handlers
 const createTransactionHandler: HandlerInterface = new CreateTransactionHandler(serviceImpl, logger);
+const getAllTransactionHandler: HandlerInterface = new GetAllTransactionHandler(serviceImpl, logger);
 
 const router: ServerRoute[] = [
 	{
 		method: "POST",
 		path: "/transaction",
 		handler: createTransactionHandler.handle.bind(createTransactionHandler)
+	},
+	{
+		method: "GET",
+		path: "/transactions",
+		handler: getAllTransactionHandler.handle.bind(getAllTransactionHandler)
 	}
 ]
 

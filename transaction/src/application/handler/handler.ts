@@ -1,12 +1,13 @@
 import { Request, ResponseToolkit, ResponseObject } from "@hapi/hapi";
 import { HandlerInterface } from "./handlerRepository";
 import { ServiceInterface } from "../service/serviceRepository";
-import { CreateTransactionRequest } from "./request";
+import { CreateTransactionRequest, GetAllQueryParam } from "./request";
 import { CustomError } from "../../utils/error/error";
 import { HttpCode } from "../../constants/const";
-import { CreateTransactionResponse } from "./response";
+import { CreateTransactionResponse, GetTransactionResponse } from "./response";
 import { Logger } from "../../utils/logger/logger";
 import Joi, { ObjectSchema } from "joi";
+import { TransactionEntity } from "../../domain/transaction/entity";
 
 export class CreateTransactionHandler implements HandlerInterface {
 	private serviceRepo: ServiceInterface;
@@ -43,5 +44,39 @@ export class CreateTransactionHandler implements HandlerInterface {
 			const newErr = new Error(`${e}`);
 			throw new CustomError(newErr, HttpCode.InternalServerError);
 		}
+	}
+}
+
+export class GetAllTransactionHandler implements HandlerInterface {
+	private serviceRepo: ServiceInterface;
+	private log: Logger;
+	constructor(service: ServiceInterface, logger: Logger) {
+		this.serviceRepo = service;
+		this.log = logger;
+	}
+	async handle(req: Request, res: ResponseToolkit): Promise<ResponseObject> {
+		var { page, limit } = req.query;
+		if (page == undefined) {
+			page = "1"
+		}
+		if (limit == undefined) {
+			limit = "10"
+		}
+		const payload: GetAllQueryParam = { page, limit };
+		try {
+
+			const transactions = await this.serviceRepo.getAllTransactions(payload);
+			const resp: GetTransactionResponse<TransactionEntity[]> = {
+				code: HttpCode.Ok,
+				message: "ok",
+				data: transactions
+			}
+			return res.response(resp).code(HttpCode.Ok);
+		} catch (e) {
+			this.log.error(`Error on service layer : ${e}`)
+			const newErr = new Error(`${e}`);
+			throw new CustomError(newErr, HttpCode.InternalServerError);
+		}
+
 	}
 }

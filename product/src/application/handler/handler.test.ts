@@ -17,6 +17,8 @@ describe('GetProductsHandler', () => {
 					"stock": 123
 				}
 			]),
+			syncAllProduct: jest.fn().mockResolvedValue([
+			]),
 		};
 
 		// Create an instance of the handler

@@ -4,3 +4,5 @@ product/coverage/lcov-report/dist
 product/coverage/lcov-report/dist
 product/coverage
 product/coverage
+transaction/node_modules
+transaction/dist

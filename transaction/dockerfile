@@ -1,0 +1,17 @@
+FROM node:14-alpine
+
+WORKDIR /app
+
+COPY transaction/ .
+
+RUN npm cache clean --force
+
+RUN npm ci --quiet --only=production || cat /root/.npm/_logs/*
+
+RUN npm install
+
+RUN npm run build
+
+EXPOSE 4000
+
+CMD [ "node", "./dist/main.js" ]

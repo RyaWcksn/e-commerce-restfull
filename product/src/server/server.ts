@@ -12,7 +12,7 @@ import { ProductImpl } from "../domain/products/product";
 
 const server: Server = new Server({
 	port: 3000,
-	host: 'localhost'
+	host: '0.0.0.0'
 })
 
 // Initiate all domains and utilities
@@ -70,7 +70,7 @@ server.ext('onPreResponse', (req: Request, res: ResponseToolkit) => {
 export const startServer = async () => {
 	try {
 		await server.start()
-		console.log("Running on http://localhost:3000");
+		console.log(`Running on ${server.info.uri}`);
 	} catch (error) {
 		console.error("Error while starting server: ", error);
 	}

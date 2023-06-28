@@ -33,7 +33,8 @@ export class CreateTransactionHandler implements HandlerInterface {
 			await this.serviceRepo.createTransaction(payload);
 			const resp: CreateTransactionResponse = {
 				code: HttpCode.Created,
-				message: "Created"
+				sku: payload.sku,
+				qty: payload.qty,
 			}
 			this.log.log("Transaction created");
 			return res.response(resp).code(HttpCode.Created);

@@ -3,6 +3,6 @@ export interface GetAllQueryParam {
 	limit: string,
 }
 
-export interface GetParam {
+export interface ParamRequest {
 	sku: string
 }

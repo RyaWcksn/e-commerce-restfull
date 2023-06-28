@@ -1,22 +1,15 @@
 import { Product } from "../../domain/products/entity";
 
-export interface GetAllProductResponse {
+export interface ProductResponse<product> {
 	code: Number
-	page: Number
-	pageSize: Number
-	data: Product[]
+	page?: Number
+	pageSize?: Number
+	message: string
+	data: product
 }
 
 
-export interface SyncProductResponse {
+export interface CommonResponse {
 	code: Number
 	message: string
 }
-
-
-export interface GetDetailsResponse {
-	code: Number
-	mesage: string
-	data: Product
-}
-

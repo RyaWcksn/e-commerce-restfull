@@ -1,10 +1,10 @@
 import { Request, ResponseToolkit, ResponseObject } from "@hapi/hapi";
 import { HandlerInterface } from "./handlerRepository";
 import { ServiceInterface } from "../service/serviceRepository";
-import { CreateTransactionRequest, GetAllQueryParam } from "./request";
+import { JsonRequest, ParamRequest, QueryParamRequest } from "./request";
 import { CustomError } from "../../utils/error/error";
 import { HttpCode } from "../../constants/const";
-import { CreateTransactionResponse, GetTransactionResponse } from "./response";
+import { CommonResponse, TransactionResponse } from "./response";
 import { Logger } from "../../utils/logger/logger";
 import Joi, { ObjectSchema } from "joi";
 import { TransactionEntity } from "../../domain/transaction/entity";
@@ -29,13 +29,13 @@ export class CreateTransactionHandler implements HandlerInterface {
 			const newErr = new Error(`${errorMessage}`);
 			throw new CustomError(newErr, HttpCode.BadRequest);
 		}
-		const payload: CreateTransactionRequest = value as CreateTransactionRequest;
+		const payload: JsonRequest = value as JsonRequest;
 		try {
 			await this.serviceRepo.createTransaction(payload);
-			const resp: CreateTransactionResponse = {
+			const resp: TransactionResponse<JsonRequest> = {
 				code: HttpCode.Created,
-				sku: payload.sku,
-				qty: payload.qty,
+				message: "ok",
+				data: payload
 			}
 			this.log.log("Transaction created");
 			return res.response(resp).code(HttpCode.Created);
@@ -62,16 +62,42 @@ export class GetAllTransactionHandler implements HandlerInterface {
 		if (limit == undefined) {
 			limit = "10"
 		}
-		const payload: GetAllQueryParam = { page, limit };
+		const payload: QueryParamRequest = { page, limit };
 		try {
 
 			const transactions = await this.serviceRepo.getAllTransactions(payload);
-			const resp: GetTransactionResponse<TransactionEntity[]> = {
+			const resp: TransactionResponse<TransactionEntity[]> = {
 				code: HttpCode.Ok,
 				message: "ok",
 				data: transactions
 			}
 			return res.response(resp).code(HttpCode.Ok);
+		} catch (e) {
+			this.log.error(`Error on service layer : ${e}`)
+			const newErr = new Error(`${e}`);
+			throw new CustomError(newErr, HttpCode.InternalServerError);
+		}
+
+	}
+}
+
+export class DeleteTransactionHandler implements HandlerInterface {
+	private serviceRepo: ServiceInterface;
+	private log: Logger;
+	constructor(service: ServiceInterface, logger: Logger) {
+		this.serviceRepo = service;
+		this.log = logger;
+	}
+	async handle(req: Request, res: ResponseToolkit): Promise<ResponseObject> {
+		const { id } = req.params;
+		const payload: ParamRequest = { id };
+		try {
+			await this.serviceRepo.deleteTransaction(payload);
+			const dataResponse: CommonResponse = {
+				code: HttpCode.NoContent,
+				message: "deleted"
+			};
+			return res.response(dataResponse).code(HttpCode.NoContent);
 		} catch (e) {
 			this.log.error(`Error on service layer : ${e}`)
 			const newErr = new Error(`${e}`);

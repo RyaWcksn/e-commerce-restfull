@@ -1,9 +1,13 @@
-export interface CreateTransactionRequest {
+export interface JsonRequest {
 	sku: string
 	qty: number
 }
 
-export interface GetAllQueryParam {
+export interface QueryParamRequest {
 	page: string,
 	limit: string,
+}
+
+export interface ParamRequest {
+	id: string
 }

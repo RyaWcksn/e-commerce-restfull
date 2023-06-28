@@ -87,7 +87,14 @@ export class ProductImpl implements ProductInterface {
 	}
 
 	async getAllProduct(payload: GetAllQueryParam): Promise<Product[]> {
-		const { page, limit } = payload;
+		var { page, limit } = payload;
+
+		if (page == undefined) {
+			page = "1"
+		}
+		if (limit == undefined) {
+			limit = "10"
+		}
 
 		const offset = (Number(page) - 1) * Number(limit);
 		const query = `

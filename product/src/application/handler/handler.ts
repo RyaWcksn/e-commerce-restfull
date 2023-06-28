@@ -12,10 +12,16 @@ export class GetProductsHandler implements HandlerInterface {
 		this.serviceRepo = service;
 	}
 	async handle(req: Request, h: ResponseToolkit): Promise<ResponseObject> {
-		const { page, limit } = req.query;
+		var { page, limit } = req.query;
 		const getAllPayload: GetAllQueryParam = { page, limit };
 		const products: Product[] = await this.serviceRepo.getAllProduct(getAllPayload);
 
+		if (page == undefined) {
+			page = "1"
+		}
+		if (limit == undefined) {
+			limit = "10"
+		}
 		const dataResponse: GetAllProductResponse = {
 			code: HttpCode.Ok,
 			page: Number(page),

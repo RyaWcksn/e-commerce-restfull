@@ -145,7 +145,6 @@ export class ProductImpl implements ProductInterface {
 			OFFSET $1 LIMIT $2
 
 		`;
-		this.logger.log("Select All Product impl");
 		try {
 			const result = await this.pgClient.query(query, [offset, limit]);
 			return result.rows as Product[];

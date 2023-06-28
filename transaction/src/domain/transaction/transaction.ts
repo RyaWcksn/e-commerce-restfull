@@ -1,6 +1,6 @@
 import { Client } from "pg";
 import { TransactionInterface } from "./transactionRepository";
-import { CreateTransactionRequest, GetAllQueryParam } from "../../application/handler/request";
+import { JsonRequest, ParamRequest, QueryParamRequest } from "../../application/handler/request";
 import { Logger } from "../../utils/logger/logger";
 import { HttpCode } from "../../constants/const";
 import { CustomError } from "../../utils/error/error";
@@ -14,9 +14,20 @@ export class TransactionImpl implements TransactionInterface {
 		this.pgConn = conn;
 		this.log = logger;
 	}
-	async getAllTransactions(payload: GetAllQueryParam): Promise<TransactionEntity[]> {
+	async deleteTransaction(payload: ParamRequest): Promise<void> {
+		const query = `DELETE FROM adjustment_transaction WHERE id = $1;`;
+		try {
+			await this.pgConn.query(query, [payload.id]);
+			this.log.log(`transaction with id ${payload.id} is deleted`);
+		} catch (e) {
+			this.log.error(`Error while delete transaction ${e}`);
+			const errMsg = new Error(`${(e as Error).message}`);
+			throw new CustomError(errMsg, HttpCode.InternalServerError);
+		}
+	}
+	async getAllTransactions(payload: QueryParamRequest): Promise<TransactionEntity[]> {
 		const query = `
-		      SELECT at.sku, at.qty, p.price * at.qty AS amount
+		      SELECT at.id, at.sku, at.qty, p.price * at.qty AS amount
 		      FROM adjustment_transaction at
 		      INNER JOIN products p ON at.sku = p.sku
 		      ORDER BY at.id
@@ -40,14 +51,14 @@ export class TransactionImpl implements TransactionInterface {
 			const result = await this.pgConn.query(query, [offset, limit]);
 			return result.rows as TransactionEntity[];
 		} catch (error) {
-			this.log.error(`Error while get all product ${error}`);
+			this.log.error(`Error while get all transaction ${error}`);
 			const errMsg = new Error(`${(error as Error).message}`);
 			throw new CustomError(errMsg, HttpCode.InternalServerError);
 
 		}
 	}
 
-	async createTransaction(payload: CreateTransactionRequest): Promise<void> {
+	async createTransaction(payload: JsonRequest): Promise<void> {
 		let stock = await this.calculateStock(payload.sku);
 		this.log.log(stock);
 		if (stock == null) {
@@ -70,7 +81,7 @@ export class TransactionImpl implements TransactionInterface {
 			this.log.log("Adjustment transaction created");
 		} catch (e) {
 			this.log.error(`Error while creating transaction for SKU: ${payload.sku} error: ${e}`)
-			const errMsg = new Error(`Failed to get product data: ${(e as Error).message}`);
+			const errMsg = new Error(`${(e as Error).message}`);
 			throw new CustomError(errMsg, HttpCode.InternalServerError)
 		}
 	}

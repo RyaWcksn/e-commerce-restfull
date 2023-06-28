@@ -1,7 +1,8 @@
-import { CreateTransactionRequest, GetAllQueryParam } from "../../application/handler/request";
+import { JsonRequest, ParamRequest, QueryParamRequest } from "../../application/handler/request";
 import { TransactionEntity } from "./entity";
 
 export interface TransactionInterface {
-	createTransaction(payload: CreateTransactionRequest): Promise<void>;
-	getAllTransactions(payload: GetAllQueryParam): Promise<TransactionEntity[]>;
+	createTransaction(payload: JsonRequest): Promise<void>;
+	getAllTransactions(payload: QueryParamRequest): Promise<TransactionEntity[]>;
+	deleteTransaction(payload: ParamRequest): Promise<void>;
 }

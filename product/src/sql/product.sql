@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS adjustment_transaction (
   id SERIAL PRIMARY KEY,
   sku VARCHAR(255) NOT NULL,
   qty INTEGER NOT NULL,
-  amount INTEGER NOT NULL,
   FOREIGN KEY (sku) REFERENCES products (sku) ON DELETE CASCADE
 );
 

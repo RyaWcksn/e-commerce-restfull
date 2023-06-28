@@ -3,7 +3,7 @@ import { TransactionEntity } from "../../domain/transaction/entity";
 import { TransactionInterface } from "../../domain/transaction/transactionRepository";
 import { CustomError } from "../../utils/error/error";
 import { Logger } from "../../utils/logger/logger";
-import { CreateTransactionRequest, GetAllQueryParam } from "../handler/request";
+import { JsonRequest, ParamRequest, QueryParamRequest } from "../handler/request";
 import { ServiceInterface } from "./serviceRepository";
 
 export class ServiceImpl implements ServiceInterface {
@@ -13,7 +13,17 @@ export class ServiceImpl implements ServiceInterface {
 		this.transactionRepo = transaction;
 		this.log = logger;
 	}
-	async getAllTransactions(payload: GetAllQueryParam): Promise<TransactionEntity[]> {
+	async deleteTransaction(payload: ParamRequest): Promise<void> {
+		try {
+			await this.transactionRepo.deleteTransaction(payload);
+		} catch (e) {
+			this.log.error(`Error on domain layer : ${e}`);
+			const errMsg = new Error(`${e}`)
+			const err = new CustomError(errMsg, HttpCode.InternalServerError);
+			throw err;
+		}
+	}
+	async getAllTransactions(payload: QueryParamRequest): Promise<TransactionEntity[]> {
 		try {
 			const transactions = await this.transactionRepo.getAllTransactions(payload);
 			this.log.log(transactions);
@@ -25,7 +35,7 @@ export class ServiceImpl implements ServiceInterface {
 			throw err;
 		}
 	}
-	async createTransaction(payload: CreateTransactionRequest): Promise<void> {
+	async createTransaction(payload: JsonRequest): Promise<void> {
 		try {
 			await this.transactionRepo.createTransaction(payload);
 		} catch (e) {

@@ -112,7 +112,7 @@ export class DeleteProductHandler implements HandlerInterface {
 		try {
 			await this.serviceRepo.deleteProduct(payload);
 			const dataResponse: CommonResponse = {
-				code: HttpCode.Ok,
+				code: HttpCode.NoContent,
 				message: "deleted"
 			};
 			return h.response(dataResponse).code(HttpCode.NoContent);

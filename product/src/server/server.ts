@@ -43,7 +43,7 @@ const router: ServerRoute[] = [
 	},
 	{
 		method: "GET",
-		path: "/products/sync",
+		path: "/product/sync",
 		handler: syncProducts.handle.bind(syncProducts)
 	},
 	{

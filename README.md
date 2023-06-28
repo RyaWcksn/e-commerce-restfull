@@ -2,43 +2,45 @@
 
 # Technical Requirements Document
 
+[Url to kanban project board](https://github.com/users/RyaWcksn/projects/8/views/1)
+
 ## Database Design:
 
 - Design a relational database schema that includes tables for Product and AdjustmentTransaction.
 - The Product table should have columns for Name, SKU, Image, Price, and Description.
-- The AdjustmentTransaction table should have columns for SKU, Qty, and Amount.
+- The AdjustmentTransaction table should have columns for SKU, Qty.
 
 ## API Endpoints:
 
-### Products [60]
+### Products
 
-a. GET /products: Get a paginated list of products with Name, SKU, Image, Price, and Stock. [10]
-b. GET /products/{id}: Get the details of a specific product including Name, SKU, Image, Price, Stock, and Description. [5]
-c. POST /products: Create a new product with Name, SKU, Image, Price, and Description. [10]
-c. PUT /products/{id}: Update an existing product with Name, SKU, Image, Price, and Description. [10]
-d. DELETE /products/{id}: Delete a product by ID. [15]
-e. GET /products/sync: Fetch products from the WooCommerce Web Store and save them to the database, ensuring no duplicates. [20]
+- GET /products: Get a paginated list of products with Name, SKU, Image, Price, and Stock.
+- GET /product/{sku}: Get the details of a specific product including Name, SKU, Image, Price, Stock, and Description.
+- POST /product: Create a new product with Name, SKU, Image, Price, and Description.
+- PUT /product/{sku}: Update an existing product with Name, SKU, Image, Price, and Description.
+- DELETE /product/{sku}: Delete a product by ID.
+- GET /product/sync: Fetch products from the WooCommerce Web Store and save them to the database, ensuring no duplicates.
 
-### Adjustment Transaction [40]
+### Adjustment Transaction
 
-a. GET /transactions: Get a paginated list of transactions with SKU, Qty, and Amount. [10]
-b. GET /transactions/{id}: Get the details of a specific transaction including SKU, Qty, and Amount. [5]
-c. POST /transactions: Create a new transaction with SKU and Qty. [15]
-c. PUT /transactions/{id}: Update an existing transaction with SKU and Qty. [15]
-d. DELETE /transactions/{id}: Delete a transaction by ID. [10]
+- GET /transaction: Get a paginated list of transactions with SKU, Qty, and Amount. [10]
+- GET /transaction/{id}: Get the details of a specific transaction including SKU, Qty, and Amount. [5]
+- POST /transaction: Create a new transaction with SKU and Qty. [15]
+- PUT /transactions/{id}: Update an existing transaction with SKU and Qty. [15]
+- DELETE /transactions/{id}: Delete a transaction by ID. [10]
 
 ### Additional Requirements:
 
-- GET /products/search: Search products by name or SKU. [5]
-- GET /products/low-stock: Get a list of products with low stock (Stock below a certain threshold). [5]
-- GET /products/high-price: Get a list of products with a high price (Price above a certain threshold). [5]
-- GET /transactions/total-amount: Get the total amount of all transactions. [5]
+- GET /products/search: Search products by name or SKU.
+- GET /products/low-stock: Get a list of products with low stock (Stock below a certain threshold).
+- GET /products/high-price: Get a list of products with a high price (Price above a certain threshold).
+- GET /transactions/total-amount: Get the total amount of all transactions.
 
 
 ## Integration with WooCommerce Web Store:
 
 - Implement a module or service that connects to the WooCommerce Web Store API and retrieves product data.
-- Create a periodic task or webhook to sync the product data from the web store to your local database.
+- Create a periodic task or webhook to sync the product data from the web store to local database.
 
 ## Business Logic:
 

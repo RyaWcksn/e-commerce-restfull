@@ -4,6 +4,129 @@
 
 [Url to kanban project board](https://github.com/users/RyaWcksn/projects/8/views/1)
 
+## How to use
+
+### Docker
+
+```sh
+docker compose -up d
+```
+
+### Manual
+
+#### Product
+
+```sh
+cd product && npm run build && node ./dist/main.js
+```
+
+#### Transaction
+
+```sh
+cd transaction && npm run build && node ./dist/main.js
+```
+
+Collection of postman available at 
+
+```
+./collection/collection.json
+```
+
+Postgres DDL available at
+
+```
+./sql/master.sql
+```
+
+## Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant Service
+    participant Database
+
+    Client->>API: Get List Product
+    API->>Service: Retrieve product list
+    Service->>Database: Query products
+    Database-->>Service: Return product list
+    Service-->>API: Return product list
+    API-->>Client: Return product list
+
+    Client->>API: Get Detail Product
+    API->>Service: Retrieve product details
+    Service->>Database: Query product by SKU
+    Database-->>Service: Return product details
+    Service-->>API: Return product details
+    API-->>Client: Return product details
+
+    Client->>API: Create Product
+    API->>Service: Create product
+    Service->>Database: Save product
+    Database-->>Service: Confirmation
+    Service-->>API: Confirmation
+    API-->>Client: Confirmation
+
+    Client->>API: Update Product
+    API->>Service: Update product
+    Service->>Database: Update product
+    Database-->>Service: Confirmation
+    Service-->>API: Confirmation
+    API-->>Client: Confirmation
+
+    Client->>API: Delete Product
+    API->>Service: Delete product
+    Service->>Database: Remove product
+    Database-->>Service: Confirmation
+    Service-->>API: Confirmation
+    API-->>Client: Confirmation
+
+    Client->>API: Get List Transactions
+    API->>Service: Retrieve transaction list
+    Service->>Database: Query transactions
+    Database-->>Service: Return transaction list
+    Service-->>API: Return transaction list
+    API-->>Client: Return transaction list
+
+    Client->>API: Get Detail Transaction
+    API->>Service: Retrieve transaction details
+    Service->>Database: Query transaction by ID
+    Database-->>Service: Return transaction details
+    Service-->>API: Return transaction details
+    API-->>Client: Return transaction details
+
+    Client->>API: Create Transaction
+    API->>Service: Create transaction
+    Service->>Database: Save transaction
+    Database-->>Service: Confirmation
+    Service-->>API: Confirmation
+    API-->>Client: Confirmation
+
+    Client->>API: Update Transaction
+    API->>Service: Update transaction
+    Service->>Database: Update transaction
+    Database-->>Service: Confirmation
+    Service-->>API: Confirmation
+    API-->>Client: Confirmation
+
+    Client->>API: Delete Transaction
+    API->>Service: Delete transaction
+    Service->>Database: Remove transaction
+    Database-->>Service: Confirmation
+    Service-->>API: Confirmation
+    API-->>Client: Confirmation
+
+    Client->>API: Get Products from WooCommerce
+    API->>Service: Retrieve products from WooCommerce
+    Service->>Database: Check for duplicate products
+    Database-->>Service: Return duplicate check result
+    Service->>Database: Save unique products
+    Database-->>Service: Confirmation
+    Service-->>API: Confirmation
+    API-->>Client: Confirmation
+```
+
 ## Database Design:
 
 - Design a relational database schema that includes tables for Product and AdjustmentTransaction.

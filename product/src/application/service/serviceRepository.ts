@@ -1,8 +1,9 @@
 import { Product } from "../../domain/products/entity";
-import { GetAllQueryParam, GetParam } from "../handler/request";
+import { GetAllQueryParam, ParamRequest } from "../handler/request";
 
 export interface ServiceInterface {
 	getAllProduct(payload: GetAllQueryParam): Promise<Product[]>;
 	syncAllProduct(): Promise<void>;
-	getProductDetail(payload: GetParam): Promise<Product>;
+	getProductDetail(payload: ParamRequest): Promise<Product>;
+	deleteProduct(payload: ParamRequest): Promise<void>;
 }

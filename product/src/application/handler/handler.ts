@@ -1,10 +1,10 @@
 import { ServiceInterface } from "../service/serviceRepository";
 import { HandlerInterface } from "./handlerRepository";
 import { Product } from "../../domain/products/entity";
-import { GetAllProductResponse, GetDetailsResponse, SyncProductResponse } from "./response";
+import { CommonResponse, ProductResponse } from "./response";
 import { HttpCode } from "../../constants/const";
 import { Request, ResponseObject, ResponseToolkit } from "@hapi/hapi";
-import { GetAllQueryParam, GetParam } from "./request";
+import { GetAllQueryParam, ParamRequest } from "./request";
 import { Logger } from "../../utils/logger/logger";
 import { CustomError } from "../../utils/error/error";
 
@@ -26,11 +26,12 @@ export class GetProductsHandler implements HandlerInterface {
 			limit = "10"
 		}
 		try {
-			const dataResponse: GetAllProductResponse = {
+			const dataResponse: ProductResponse<Product[]> = {
 				code: HttpCode.Ok,
 				page: Number(page),
 				pageSize: Number(limit),
-				data: products
+				message: "ok",
+				data: products,
 			};
 			return h.response(dataResponse).code(HttpCode.Ok);
 
@@ -53,7 +54,7 @@ export class SyncProductHandler implements HandlerInterface {
 	async handle(req: Request, h: ResponseToolkit): Promise<ResponseObject> {
 		try {
 			await this.serviceRepo.syncAllProduct();
-			const dataResponse: SyncProductResponse = {
+			const dataResponse: CommonResponse = {
 				code: HttpCode.Ok,
 				message: "syncted"
 			};
@@ -78,14 +79,13 @@ export class GetProductDetailHandler implements HandlerInterface {
 
 	async handle(req: Request, h: ResponseToolkit): Promise<ResponseObject> {
 		const { sku } = req.params;
-		const payload: GetParam = { sku };
-		this.log.log("SKU : ", sku)
+		const payload: ParamRequest = { sku };
 		try {
 			const product: Product = await this.serviceRepo.getProductDetail(payload);
-			const dataResponse: GetDetailsResponse = {
+			const dataResponse: ProductResponse<Product> = {
 				code: HttpCode.Ok,
-				mesage: "ok",
-				data: product
+				message: "ok",
+				data: product,
 			}
 			return h.response(dataResponse).code(HttpCode.Ok);
 		} catch (e) {
@@ -95,5 +95,32 @@ export class GetProductDetailHandler implements HandlerInterface {
 
 		}
 
+	}
+}
+
+export class DeleteProductHandler implements HandlerInterface {
+	private serviceRepo: ServiceInterface;
+	private log: Logger;
+	constructor(service: ServiceInterface, logger: Logger) {
+		this.serviceRepo = service;
+		this.log = logger;
+	}
+
+	async handle(req: Request, h: ResponseToolkit): Promise<ResponseObject> {
+		const { sku } = req.params;
+		const payload: ParamRequest = { sku };
+		try {
+			await this.serviceRepo.deleteProduct(payload);
+			const dataResponse: CommonResponse = {
+				code: HttpCode.Ok,
+				message: "deleted"
+			};
+			return h.response(dataResponse).code(HttpCode.NoContent);
+
+		} catch (e) {
+			this.log.error(`Error on service layer : ${e}`)
+			const newErr = new Error(`${e}`);
+			throw new CustomError(newErr, HttpCode.InternalServerError);
+		}
 	}
 }

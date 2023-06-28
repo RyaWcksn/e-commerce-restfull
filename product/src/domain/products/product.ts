@@ -3,7 +3,7 @@ import { ProductInterface } from "./productRepository";
 import { Product } from "./entity";
 import { CustomError } from "../../utils/error/error";
 import { Logger } from "../../utils/logger/logger";
-import { GetAllQueryParam, GetParam } from "../../application/handler/request";
+import { GetAllQueryParam, ParamRequest } from "../../application/handler/request";
 import { config } from "../../config/config";
 import axios from "axios";
 import { HttpCode } from "../../constants/const";
@@ -16,7 +16,18 @@ export class ProductImpl implements ProductInterface {
 		this.pgClient = pg;
 		this.logger = log;
 	}
-	async getProductDetail(payload: GetParam): Promise<Product> {
+	async deleteProduct(payload: ParamRequest): Promise<void> {
+		const query = `DELETE FROM products WHERE sku = $1;`;
+		try {
+			await this.pgClient.query(query, [payload.sku]);
+			this.logger.log(`product with SKU ${payload.sku} is deleted`);
+		} catch (e) {
+			this.logger.error(`Error while delete product ${e}`);
+			const errMsg = new Error(`${(e as Error).message}`);
+			throw new CustomError(errMsg, HttpCode.InternalServerError);
+		}
+	}
+	async getProductDetail(payload: ParamRequest): Promise<Product> {
 		try {
 			const query = `
       SELECT p.*, COALESCE(SUM(at.qty), 0) AS stock

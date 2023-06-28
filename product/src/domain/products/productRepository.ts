@@ -1,8 +1,9 @@
-import { GetAllQueryParam, GetParam } from "../../application/handler/request";
+import { GetAllQueryParam, ParamRequest } from "../../application/handler/request";
 import { Product } from "./entity";
 
 export interface ProductInterface {
 	getAllProduct(payload: GetAllQueryParam): Promise<Product[]>;
 	syncProduct(): Promise<void>;
-	getProductDetail(payload: GetParam): Promise<Product>;
+	getProductDetail(payload: ParamRequest): Promise<Product>;
+	deleteProduct(payload: ParamRequest): Promise<void>;
 }

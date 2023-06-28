@@ -14,34 +14,29 @@ export const pgConn: Client = new Client({
 pgConn.connect()
 	.then(() => {
 		console.log("Connected to PostgreSQL database");
-		// Perform additional operations here
 	})
 	.catch((error) => {
 		console.error("Failed to connect to PostgreSQL database:", error);
-		// Handle the connection error appropriately
 	});
 
 
-async function createProductsTable() {
+async function createAdjustmentTable() {
 	try {
 		const createTableQuery = `
-CREATE TABLE IF NOT EXISTS products (
+CREATE TABLE IF NOT EXISTS adjustment_transaction (
   id SERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  sku VARCHAR(50) NOT NULL,
-  image VARCHAR(255),
-  price DECIMAL(10, 2) NOT NULL,
-  description TEXT,
-  UNIQUE(sku)
+  sku VARCHAR(255) NOT NULL,
+  qty INTEGER NOT NULL,
+  FOREIGN KEY (sku) REFERENCES products (sku) ON DELETE CASCADE
 );
+
     `;
 		await pgConn.query(createTableQuery);
-		console.log("Products table created successfully");
+		console.log("Adjustment table created successfully");
 	} catch (error) {
-		console.error("Failed to create products table:", error);
+		console.error("Failed to create adjustment table:", error);
 	}
 }
 
 
-createProductsTable();
-
+createAdjustmentTable();

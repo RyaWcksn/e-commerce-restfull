@@ -98,7 +98,7 @@ export class ProductImpl implements ProductInterface {
 
 		const offset = (Number(page) - 1) * Number(limit);
 		const query = `
-			SELECT p.*, COALESCE(SUM(at.Qty), 0) AS stock
+			SELECT p.id, p.name, p.sku, p.image, p.price, CASE WHEN SUM(at.Qty) < 0 THEN 0 ELSE SUM(at.Qty) END AS stock
 			FROM products p
 			LEFT JOIN adjustment_transaction at ON p.SKU = at.SKU
 			GROUP BY p.id

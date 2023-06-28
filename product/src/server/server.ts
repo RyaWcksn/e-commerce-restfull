@@ -12,7 +12,13 @@ import { ProductImpl } from "../domain/products/product";
 
 const server: Server = new Server({
 	port: 3000,
-	host: '0.0.0.0'
+	host: '0.0.0.0',
+	routes: {
+		payload: {
+			parse: true,
+			allow: 'application/json'
+		}
+	}
 })
 
 // Initiate all domains and utilities
@@ -25,8 +31,8 @@ const productImpl: ProductInterface = new ProductImpl(dbConn, logger)
 const serviceImpl: ServiceInterface = new ServiceImpl(logger, productImpl)
 
 
-const getProducts: HandlerInterface = new GetProductsHandler(serviceImpl)
-const syncProducts: HandlerInterface = new SyncProductHandler(serviceImpl)
+const getProducts: HandlerInterface = new GetProductsHandler(serviceImpl, logger)
+const syncProducts: HandlerInterface = new SyncProductHandler(serviceImpl, logger)
 
 const router: ServerRoute[] = [
 	{
@@ -54,7 +60,7 @@ server.ext('onPreResponse', (req: Request, res: ResponseToolkit) => {
 
 		// Create an error JSON response
 		const errorResponse = {
-			statusCode: statusCode,
+			code: statusCode,
 			error: response.name || 'Internal Server Error',
 			message: response.message
 		};

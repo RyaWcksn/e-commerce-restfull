@@ -12,7 +12,13 @@ import { HandlerInterface } from "../application/handler/handlerRepository";
 
 const server: Server = new Server({
 	port: 4000,
-	host: '0.0.0.0'
+	host: '0.0.0.0',
+	routes: {
+		payload: {
+			parse: true,
+			allow: 'application/json'
+		}
+	}
 })
 
 
@@ -21,11 +27,11 @@ const logger: Logger = Logger.getInstance();
 logger.setLogLevel(LogLevel.INFO);
 
 const dbConn: Client = pgConn;
-const transactionImpl: TransactionInterface = new TransactionImpl(dbConn);
-const serviceImpl: ServiceInterface = new ServiceImpl(transactionImpl);
+const transactionImpl: TransactionInterface = new TransactionImpl(dbConn, logger);
+const serviceImpl: ServiceInterface = new ServiceImpl(transactionImpl, logger);
 
 // Handlers
-const createTransactionHandler: HandlerInterface = new CreateTransactionHandler(serviceImpl);
+const createTransactionHandler: HandlerInterface = new CreateTransactionHandler(serviceImpl, logger);
 
 const router: ServerRoute[] = [
 	{
@@ -44,7 +50,7 @@ server.ext('onPreResponse', (req: Request, res: ResponseToolkit) => {
 		const statusCode = response.statusCode || 500;
 
 		const errorResponse = {
-			statusCode: statusCode,
+			code: statusCode,
 			error: response.name || 'Internal Server Error',
 			message: response.message
 		};

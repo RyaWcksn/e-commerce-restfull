@@ -20,8 +20,9 @@ export class ServiceImpl implements ServiceInterface {
 		try {
 			await this.productRepo.syncProduct();
 		} catch (e) {
-			this.log.error(`Error on service layer : ${e}`)
-			const err = new CustomError(e as Error, HttpCode.InternalServerError);
+			this.log.error(`Error on domain layer : ${e}`)
+			const errMsg = new Error(`Error from error domain layer: ${e}`)
+			const err = new CustomError(errMsg, HttpCode.InternalServerError);
 			throw err;
 		}
 	}
@@ -33,8 +34,9 @@ export class ServiceImpl implements ServiceInterface {
 			return dummyData
 
 		} catch (e) {
-			this.log.error(`Error on service layer : ${e}`)
-			const err = new CustomError(e as Error, HttpCode.InternalServerError);
+			this.log.error(`Error on domain layer : ${e}`)
+			const errMsg = new Error(`Error from error domain layer: ${e}`)
+			const err = new CustomError(errMsg, HttpCode.InternalServerError);
 			throw err;
 
 		}

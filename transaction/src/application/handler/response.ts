@@ -1,4 +1,5 @@
 export interface CreateTransactionResponse {
 	code: Number
-	message: string
+	sku: string
+	qty: number
 }

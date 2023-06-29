@@ -14,6 +14,37 @@ export class TransactionImpl implements TransactionInterface {
 		this.pgConn = conn;
 		this.log = logger;
 	}
+	async getTransactionDetails(payload: ParamRequest): Promise<TransactionEntity> {
+		const query = `
+		      SELECT at.id, at.sku, at.qty, p.price * at.qty AS amount
+		      FROM adjustment_transaction at
+		      INNER JOIN products p ON at.sku = p.sku
+		      WHERE at.id = $1
+		      ORDER BY at.id;
+		`
+		try {
+			const row = await this.pgConn.query(query, [payload.id]);
+
+			if (row.rowCount === 0) {
+				this.log.error(`No record found for transaction id ${payload.id}`);
+				const errMsg = new Error("No record");
+				throw new CustomError(errMsg, HttpCode.BadRequest);
+			}
+
+			const transaction: TransactionEntity = {
+				id: row.rows[0].id,
+				sku: row.rows[0].sku,
+				qty: row.rows[0].qty,
+				amount: row.rows[0].amount,
+			};
+			return transaction;
+
+		} catch (e) {
+			this.log.error(`Error while get transaction details ${e}`);
+			const errMsg = new Error(`${(e as Error).message}`);
+			throw new CustomError(errMsg, HttpCode.InternalServerError);
+		}
+	}
 	async deleteTransaction(payload: ParamRequest): Promise<void> {
 		const query = `DELETE FROM adjustment_transaction WHERE id = $1;`;
 		try {

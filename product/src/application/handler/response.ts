@@ -1,5 +1,3 @@
-import { Product } from "../../domain/products/entity";
-
 export interface ProductResponse<product> {
 	code: Number
 	page?: Number

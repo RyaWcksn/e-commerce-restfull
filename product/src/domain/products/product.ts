@@ -3,7 +3,7 @@ import { ProductInterface } from "./productRepository";
 import { Product } from "./entity";
 import { CustomError } from "../../utils/error/error";
 import { Logger } from "../../utils/logger/logger";
-import { GetAllQueryParam, ParamRequest } from "../../application/handler/request";
+import { QueryParamRequest, JsonRequest, ParamRequest } from "../../application/handler/request";
 import { config } from "../../config/config";
 import axios from "axios";
 import { HttpCode } from "../../constants/const";
@@ -15,6 +15,29 @@ export class ProductImpl implements ProductInterface {
 	constructor(pg: Client, log: Logger) {
 		this.pgClient = pg;
 		this.logger = log;
+	}
+	async createProduct(payload: JsonRequest): Promise<void> {
+		const { name, sku, image, price, description } = payload;
+		try {
+			const existingProductQuery = 'SELECT * FROM products WHERE sku = $1';
+			const existingProductResult = await this.pgClient.query(existingProductQuery, [sku]);
+
+			if (existingProductResult.rows.length > 0) {
+				const e = new Error(`Product with SKU ${sku} already exists.`);
+				this.logger.error(`Error while creating product: ${e}`);
+				throw new CustomError(e, HttpCode.BadRequest);
+			}
+
+			const createQuery =
+				'INSERT INTO products (name, sku, image, price, description) VALUES ($1, $2, $3, $4, $5)';
+			await this.pgClient.query(createQuery, [name, sku, image, price, description]);
+
+			this.logger.log(`Product with SKU ${sku} created successfully.`);
+		} catch (e) {
+			this.logger.error(`Error while creating product: ${e}`);
+			const errMsg = new Error(`${e}`);
+			throw new CustomError(errMsg, HttpCode.InternalServerError);
+		}
 	}
 	async deleteProduct(payload: ParamRequest): Promise<void> {
 		const query = `DELETE FROM products WHERE sku = $1;`;
@@ -125,7 +148,7 @@ export class ProductImpl implements ProductInterface {
 		}
 	}
 
-	async getAllProduct(payload: GetAllQueryParam): Promise<Product[]> {
+	async getAllProduct(payload: QueryParamRequest): Promise<Product[]> {
 		var { page, limit } = payload;
 
 		if (page == undefined) {

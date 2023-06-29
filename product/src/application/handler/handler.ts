@@ -4,9 +4,10 @@ import { Product } from "../../domain/products/entity";
 import { CommonResponse, ProductResponse } from "./response";
 import { HttpCode } from "../../constants/const";
 import { Request, ResponseObject, ResponseToolkit } from "@hapi/hapi";
-import { GetAllQueryParam, ParamRequest } from "./request";
+import { QueryParamRequest, ParamRequest, JsonRequest } from "./request";
 import { Logger } from "../../utils/logger/logger";
 import { CustomError } from "../../utils/error/error";
+import Joi, { ObjectSchema } from "joi";
 
 export class GetProductsHandler implements HandlerInterface {
 	private serviceRepo: ServiceInterface;
@@ -17,7 +18,7 @@ export class GetProductsHandler implements HandlerInterface {
 	}
 	async handle(req: Request, h: ResponseToolkit): Promise<ResponseObject> {
 		var { page, limit } = req.query;
-		const getAllPayload: GetAllQueryParam = { page, limit };
+		const getAllPayload: QueryParamRequest = { page, limit };
 		const products: Product[] = await this.serviceRepo.getAllProduct(getAllPayload);
 		if (page == undefined) {
 			page = "1"
@@ -122,5 +123,46 @@ export class DeleteProductHandler implements HandlerInterface {
 			const newErr = new Error(`${e}`);
 			throw new CustomError(newErr, HttpCode.InternalServerError);
 		}
+	}
+}
+
+export class CreateProductHandler implements HandlerInterface {
+	private serviceRepo: ServiceInterface;
+	private log: Logger;
+	constructor(service: ServiceInterface, logger: Logger) {
+		this.serviceRepo = service;
+		this.log = logger;
+	}
+	async handle(req: Request, h: ResponseToolkit): Promise<ResponseObject> {
+		const schema: ObjectSchema = Joi.object({
+			name: Joi.string().required(),
+			sku: Joi.string().required(),
+			image: Joi.string().required(),
+			price: Joi.number().required(),
+		})
+
+		const { error, value } = schema.validate(req.payload);
+		if (error) {
+			const errorMessage = error.details.map((detail) => detail.message).join(', ');
+			this.log.error(`${errorMessage}`)
+			const newErr = new Error(`${errorMessage}`);
+			throw new CustomError(newErr, HttpCode.BadRequest);
+		}
+		const payload: JsonRequest = value as JsonRequest;
+		try {
+			await this.serviceRepo.createProduct(payload);
+			const resp: ProductResponse<JsonRequest> = {
+				code: HttpCode.Created,
+				message: "ok",
+				data: payload
+			}
+			this.log.log("Product created");
+			return h.response(resp).code(HttpCode.Created);
+		} catch (e) {
+			this.log.error(`Error on service layer : ${e}`)
+			const newErr = new Error(`${e}`);
+			throw new CustomError(newErr, HttpCode.InternalServerError);
+		}
+
 	}
 }

@@ -166,3 +166,47 @@ export class CreateProductHandler implements HandlerInterface {
 
 	}
 }
+
+ export class UpdateProductHandler implements HandlerInterface {
+	private serviceRepo: ServiceInterface;
+	private log: Logger;
+	constructor(service: ServiceInterface, logger: Logger) {
+		this.serviceRepo = service;
+		this.log = logger;
+	}
+	async handle(req: Request, h: ResponseToolkit): Promise<ResponseObject> {
+		const schema: ObjectSchema = Joi.object({
+			name: Joi.string().required(),
+			sku: Joi.string().required(),
+			image: Joi.string().required(),
+			price: Joi.number().required(),
+		})
+		const { sku } = req.params;
+		const param: ParamRequest = { sku };
+
+		const { error, value } = schema.validate(req.payload);
+		if (error) {
+			const errorMessage = error.details.map((detail) => detail.message).join(', ');
+			this.log.error(`${errorMessage}`)
+			const newErr = new Error(`${errorMessage}`);
+			throw new CustomError(newErr, HttpCode.BadRequest);
+		}
+		const body: JsonRequest = value as JsonRequest;
+		try {
+			await this.serviceRepo.updateProduct(param, body);
+			const resp: ProductResponse<JsonRequest> = {
+				code: HttpCode.Ok,
+				message: "ok",
+				data: body
+			}
+			this.log.log("Product updated");
+			return h.response(resp).code(HttpCode.Ok);
+		} catch (e) {
+			this.log.error(`Error on service layer : ${e}`)
+			const newErr = new Error(`${e}`);
+			throw new CustomError(newErr, HttpCode.InternalServerError);
+		}
+
+	}
+
+ }

@@ -3,7 +3,7 @@ import { pgConn } from "../infrastructure/postres/connection";
 import { ServiceInterface } from "../application/service/serviceRepository";
 import { ServiceImpl } from "../application/service/service";
 import { HandlerInterface } from "../application/handler/handlerRepository";
-import { CreateProductHandler, DeleteProductHandler, GetProductDetailHandler, GetProductsHandler, SyncProductHandler } from "../application/handler/handler";
+import { CreateProductHandler, DeleteProductHandler, GetProductDetailHandler, GetProductsHandler, SyncProductHandler, UpdateProductHandler } from "../application/handler/handler";
 import { LogLevel, Logger } from "../utils/logger/logger";
 import { CustomError } from "../utils/error/error";
 import { Request, ResponseToolkit, Server, ServerRoute } from "@hapi/hapi";
@@ -36,6 +36,7 @@ const syncProducts: HandlerInterface = new SyncProductHandler(serviceImpl, logge
 const getDetail: HandlerInterface = new GetProductDetailHandler(serviceImpl, logger);
 const deleteProduct: HandlerInterface = new DeleteProductHandler(serviceImpl, logger);
 const createProduct: HandlerInterface = new CreateProductHandler(serviceImpl, logger);
+const updateProduct: HandlerInterface = new UpdateProductHandler(serviceImpl, logger);
 
 const router: ServerRoute[] = [
 	{
@@ -62,6 +63,11 @@ const router: ServerRoute[] = [
 		method: "POST",
 		path: "/product",
 		handler: createProduct.handle.bind(createProduct)
+	},
+	{
+		method: "PUT",
+		path: "/product/{sku}",
+		handler: updateProduct.handle.bind(updateProduct)
 	},
 ]
 

@@ -3,7 +3,7 @@ import { Product } from "../../domain/products/entity";
 import { ProductInterface } from "../../domain/products/productRepository";
 import { CustomError } from "../../utils/error/error";
 import { Logger } from "../../utils/logger/logger";
-import { GetAllQueryParam, ParamRequest } from "../handler/request";
+import { QueryParamRequest, ParamRequest, JsonRequest } from "../handler/request";
 import { ServiceInterface } from "./serviceRepository";
 
 export class ServiceImpl implements ServiceInterface {
@@ -14,6 +14,16 @@ export class ServiceImpl implements ServiceInterface {
 	constructor(log: Logger, product: ProductInterface) {
 		this.log = log;
 		this.productRepo = product;
+	}
+	async createProduct(payload: JsonRequest): Promise<void> {
+		try {
+			await this.productRepo.createProduct(payload);
+		} catch (e) {
+			this.log.error(`Error on domain layer : ${e}`);
+			const errMsg = new Error(`${e}`)
+			const err = new CustomError(errMsg, HttpCode.InternalServerError);
+			throw err;
+		}
 	}
 	async deleteProduct(payload: ParamRequest): Promise<void> {
 		try {
@@ -48,7 +58,7 @@ export class ServiceImpl implements ServiceInterface {
 		}
 	}
 
-	async getAllProduct(payload: GetAllQueryParam): Promise<Product[]> {
+	async getAllProduct(payload: QueryParamRequest): Promise<Product[]> {
 		this.log.log("Service layer")
 		try {
 			const dummyData = await this.productRepo.getAllProduct(payload);

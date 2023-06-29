@@ -106,3 +106,30 @@ export class DeleteTransactionHandler implements HandlerInterface {
 
 	}
 }
+
+export class GetTransactionDetailHandler implements HandlerInterface {
+	private serviceRepo: ServiceInterface;
+	private log: Logger;
+	constructor(service: ServiceInterface, logger: Logger) {
+		this.serviceRepo = service;
+		this.log = logger;
+	}
+	async handle(req: Request, res: ResponseToolkit): Promise<ResponseObject> {
+		const { id } = req.params;
+		const payload: ParamRequest = { id };
+		try {
+			const transaction = await this.serviceRepo.getTransactionDetails(payload);
+			const dataResponse: TransactionResponse<TransactionEntity> = {
+				code: HttpCode.Ok,
+				message: "ok",
+				data: transaction
+			};
+			return res.response(dataResponse).code(HttpCode.Ok);
+		} catch (e) {
+			this.log.error(`Error on service layer : ${e}`)
+			const newErr = new Error(`${e}`);
+			throw new CustomError(newErr, HttpCode.InternalServerError);
+		}
+	}
+
+}

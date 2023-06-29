@@ -7,7 +7,7 @@ import { TransactionImpl } from "../domain/transaction/transaction";
 import { TransactionInterface } from "../domain/transaction/transactionRepository";
 import { ServiceInterface } from "../application/service/serviceRepository";
 import { ServiceImpl } from "../application/service/service";
-import { CreateTransactionHandler, DeleteTransactionHandler, GetAllTransactionHandler } from "../application/handler/handler";
+import { CreateTransactionHandler, DeleteTransactionHandler, GetAllTransactionHandler, GetTransactionDetailHandler } from "../application/handler/handler";
 import { HandlerInterface } from "../application/handler/handlerRepository";
 
 const server: Server = new Server({
@@ -34,6 +34,8 @@ const serviceImpl: ServiceInterface = new ServiceImpl(transactionImpl, logger);
 const createTransactionHandler: HandlerInterface = new CreateTransactionHandler(serviceImpl, logger);
 const getAllTransactionHandler: HandlerInterface = new GetAllTransactionHandler(serviceImpl, logger);
 const deleteTransactionHandler: HandlerInterface = new DeleteTransactionHandler(serviceImpl, logger);
+const getTransactionDetailHandler: HandlerInterface = new GetTransactionDetailHandler(serviceImpl, logger);
+
 
 const router: ServerRoute[] = [
 	{
@@ -50,7 +52,12 @@ const router: ServerRoute[] = [
 		method: "DELETE",
 		path: "/transaction/{id}",
 		handler: deleteTransactionHandler.handle.bind(deleteTransactionHandler)
-	}
+	},
+	{
+		method: "GET",
+		path: "/transaction/{id}",
+		handler: getTransactionDetailHandler.handle.bind(getTransactionDetailHandler)
+	},
 ]
 
 server.route(router);

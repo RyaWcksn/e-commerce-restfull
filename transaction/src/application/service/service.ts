@@ -13,6 +13,18 @@ export class ServiceImpl implements ServiceInterface {
 		this.transactionRepo = transaction;
 		this.log = logger;
 	}
+	async getTransactionDetails(payload: ParamRequest): Promise<TransactionEntity> {
+		try {
+			const transactions = await this.transactionRepo.getTransactionDetails(payload);
+			this.log.log(transactions);
+			return transactions;
+		} catch (e) {
+			this.log.error(`Error on domain layer : ${e}`)
+			const errMsg = new Error(`${e}`)
+			const err = new CustomError(errMsg, HttpCode.InternalServerError);
+			throw err;
+		}
+	}
 	async deleteTransaction(payload: ParamRequest): Promise<void> {
 		try {
 			await this.transactionRepo.deleteTransaction(payload);

@@ -133,3 +133,44 @@ export class GetTransactionDetailHandler implements HandlerInterface {
 	}
 
 }
+
+export class UpdateTransactionHandler implements HandlerInterface {
+	private serviceRepo: ServiceInterface;
+	private log: Logger;
+	constructor(service: ServiceInterface, logger: Logger) {
+		this.serviceRepo = service;
+		this.log = logger;
+	}
+	async handle(req: Request, res: ResponseToolkit): Promise<ResponseObject> {
+		const { id } = req.params;
+		const param: ParamRequest = { id };
+
+		const schema: ObjectSchema = Joi.object({
+			sku: Joi.string().required(),
+			qty: Joi.number().required()
+		})
+
+		const { error, value } = schema.validate(req.payload);
+		if (error) {
+			const errorMessage = error.details.map((detail) => detail.message).join(', ');
+			this.log.error(`${errorMessage}`)
+			const newErr = new Error(`${errorMessage}`);
+			throw new CustomError(newErr, HttpCode.BadRequest);
+		}
+		const body: JsonRequest = value as JsonRequest;
+		try {
+			await this.serviceRepo.updateTransaction(param, body);
+			const resp: TransactionResponse<JsonRequest> = {
+				code: HttpCode.Created,
+				message: "ok",
+				data: body
+			}
+			this.log.log("Transaction updated");
+			return res.response(resp).code(HttpCode.Ok);
+		} catch (e) {
+			this.log.error(`Error on service layer : ${e}`)
+			const newErr = new Error(`${e}`);
+			throw new CustomError(newErr, HttpCode.InternalServerError);
+		}
+	};
+}

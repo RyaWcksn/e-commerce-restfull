@@ -6,4 +6,5 @@ export interface ServiceInterface {
 	getAllTransactions(payload: QueryParamRequest): Promise<TransactionEntity[]>;
 	deleteTransaction(payload: ParamRequest): Promise<void>;
 	getTransactionDetails(payload: ParamRequest): Promise<TransactionEntity>;
+	updateTransaction(param: ParamRequest, body: JsonRequest): Promise<void>;
 }

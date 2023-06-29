@@ -14,6 +14,17 @@ export class TransactionImpl implements TransactionInterface {
 		this.pgConn = conn;
 		this.log = logger;
 	}
+	async updateTransaction(param: ParamRequest, body: JsonRequest): Promise<void> {
+		const query = 'UPDATE adjustment_transaction SET sku = $1, qty = $2 WHERE id = $3';
+		try {
+			await this.pgConn.query(query, [body.sku, body.qty, param.id]);
+			this.log.log(`Transaction with id ${param.id} is updated`);
+		} catch (e) {
+			this.log.error(`Error while update transaction ${e}`);
+			const errMsg = new Error(`${(e as Error).message}`);
+			throw new CustomError(errMsg, HttpCode.InternalServerError);
+		}
+	}
 	async getTransactionDetails(payload: ParamRequest): Promise<TransactionEntity> {
 		const query = `
 		      SELECT at.id, at.sku, at.qty, p.price * at.qty AS amount

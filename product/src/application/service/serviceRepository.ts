@@ -7,4 +7,5 @@ export interface ServiceInterface {
 	getProductDetail(payload: ParamRequest): Promise<Product>;
 	deleteProduct(payload: ParamRequest): Promise<void>;
 	createProduct(payload: JsonRequest): Promise<void>;
+	updateProduct(param: ParamRequest, body: JsonRequest): Promise<void>;
 }

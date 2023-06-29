@@ -15,6 +15,16 @@ export class ServiceImpl implements ServiceInterface {
 		this.log = log;
 		this.productRepo = product;
 	}
+	async updateProduct(param: ParamRequest, body: JsonRequest): Promise<void> {
+		try {
+			await this.productRepo.updateProduct(param, body);
+		} catch (e) {
+			this.log.error(`Error on domain layer : ${e}`);
+			const errMsg = new Error(`${e}`)
+			const err = new CustomError(errMsg, HttpCode.InternalServerError);
+			throw err;
+		}
+	}
 	async createProduct(payload: JsonRequest): Promise<void> {
 		try {
 			await this.productRepo.createProduct(payload);

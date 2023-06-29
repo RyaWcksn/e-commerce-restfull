@@ -16,6 +16,29 @@ export class ProductImpl implements ProductInterface {
 		this.pgClient = pg;
 		this.logger = log;
 	}
+	async updateProduct(param: ParamRequest, body: JsonRequest): Promise<void> {
+		const { sku } = param;
+		const { name, image, price, description } = body;
+		try {
+			const existingProductQuery = 'SELECT * FROM products WHERE sku = $1';
+			const existingProductResult = await this.pgClient.query(existingProductQuery, [param.sku]);
+
+			if (existingProductResult.rows.length === 0) {
+				throw new Error(`Product with SKU ${param.sku} does not exist.`);
+			}
+
+			// Update the product
+			const updateQuery =
+				'UPDATE products SET name = $1, image = $2, price = $3, description = $4 WHERE sku = $5';
+			await this.pgClient.query(updateQuery, [name, image, price, description, sku]);
+
+			this.logger.log(`Product with SKU ${param.sku} updated successfully.`);
+		} catch (e) {
+			this.logger.error(`Error while updating product: ${e}`);
+			const errMsg = new Error(`${e}`);
+			throw new CustomError(errMsg, HttpCode.InternalServerError);
+		}
+	}
 	async createProduct(payload: JsonRequest): Promise<void> {
 		const { name, sku, image, price, description } = payload;
 		try {
